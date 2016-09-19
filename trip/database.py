@@ -1,14 +1,16 @@
 from peewee import (
-    SqliteDatabase, Model, CharField, DateField, BooleanField
+    SqliteDatabase, Model, CharField, IntegerField
 )
 
 db = SqliteDatabase('../scrapy.db')
 
 
-class Person(Model):
+class Property(Model):
+    id = CharField(primary_key=True)
+    location = IntegerField()
+    ranking = IntegerField()
     name = CharField()
-    birthday = DateField()
-    is_relative = BooleanField()
+    url = CharField()
 
     class Meta:
         database = db

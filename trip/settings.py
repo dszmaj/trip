@@ -9,6 +9,13 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+HOTELS_NUMBER = 1000
+
+
+
+
+
+
 BOT_NAME = 'trip'
 
 SPIDER_MODULES = ['trip.spiders']
