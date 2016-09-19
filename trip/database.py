@@ -2,7 +2,7 @@ from peewee import (
     SqliteDatabase, Model, CharField, DateField, BooleanField
 )
 
-db = SqliteDatabase('scrapy.db')
+db = SqliteDatabase('../scrapy.db')
 
 
 class Person(Model):
