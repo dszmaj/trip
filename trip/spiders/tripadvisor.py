@@ -3,46 +3,53 @@ from scrapy import FormRequest
 from ..items import PropertyItem
 
 
-class TripadvisorSpider(scrapy.Spider):
+class PropertySpider(scrapy.Spider):
     name = "tripadvisor"
     allowed_domains = ["tripadvisor.com"]
     common_data = {
-        'seen': 0,
-        'sequence': 1,
-        'geo': 274723,
-        'adults': 2,
-        'rooms': 1,
-        'searchAll': False,
+        'seen': '0',
+        'sequence': '1',
+        'geo': '274723',
+        'adults': '2',
+        'rooms': '1',
+        'searchAll': 'false',
         'requestingServlet': 'Hotels',
-        'refineForm': True,
-        'hs': None,
-        'pageSize': None,
-        'rad': 0,
-        'dateBumped': None,
+        'refineForm': 'true',
+        'hs': '',
+        'pageSize': '',
+        'rad': '0',
+        'dateBumped': '',
         'displayedSortOrder': 'popularity'
     }
+    start_item = 0
 
     def start_requests(self):
-        return FormRequest(
+        _common = self.common_data
+        _common.update({'o': 'a' + str(0)})
+        return [FormRequest(
             url='https://pl.tripadvisor.com/Hotels',
-            formdata=self.common_data.update({'o': 'a' + str(0)})
-        )
+            method='POST',
+            formdata=_common
+        )]
 
     def parse(self, response):
-        start_item = 30
-        while response.status == 200:
+        if response.status == 200:
+            _common = self.common_data
+            _common.update({'o': 'a' + str(self.start_item)})
             yield FormRequest(
                 url=response.url,
-                formdata=self.common_data.update({'o': 'a' + str(start_item)})
+                method='POST',
+                formdata=_common
             )
-            start_item += 30
+            self.start_item += 30
 
         listings = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' listing ')]")
         for listing in listings:
             prop = PropertyItem()
-            prop.id = listing.xpath('@id').extract_first()
-            prop.location = listing.xpath('@data-locationid').extract_first()
-            prop.ranking = listing.xpath('@data-rankinlist').extract_first()
-            prop.name = listing.xpath('//div[@class="listing_title"]/a/text()').extract_first()
-            prop.url = prop.name.xpath('@href').extract_first()
+            prop['id'] = listing.xpath('@id').extract_first()
+            prop['location'] = listing.xpath('@data-locationid').extract_first()
+            prop['ranking'] = listing.xpath('@data-rankinlist').extract_first()
+            _name = listing.xpath('//*[@id="property_{}"]'.format(prop['location']))
+            prop['name'] = _name.xpath('text()').extract_first()
+            prop['url'] = _name.xpath('@href').extract_first()
             yield prop
