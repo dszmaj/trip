@@ -34,6 +34,7 @@ class PropertySpider(scrapy.Spider):
 
     def parse(self, response):
         if response.status == 200:
+            self.start_item += 30
             _common = self.common_data
             _common.update({'o': 'a' + str(self.start_item)})
             yield FormRequest(
@@ -41,7 +42,6 @@ class PropertySpider(scrapy.Spider):
                 method='POST',
                 formdata=_common
             )
-            self.start_item += 30
 
         listings = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' listing ')]")
         for listing in listings:
