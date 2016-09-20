@@ -1,11 +1,23 @@
-# -*- coding: utf-8 -*-
-
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+from .database import Property, Review, db
 
 
-class TripPipeline(object):
-    def process_item(self, item, spider):
-        return item
+db.connect()
+try:
+    db.create_tables([Review, Property])
+except:
+    # no need for anything better as it basically fails only if db exists
+    pass
+
+
+class ReviewPipe:
+    @staticmethod
+    def process_item(item, spider):
+        review = Review.from_item(item)
+        review.save()
+
+
+class PropertyPipe:
+    @staticmethod
+    def process_item(item, spider):
+        prop = Property.from_item(item)
+        prop.save()

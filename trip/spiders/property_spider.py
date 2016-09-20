@@ -1,5 +1,5 @@
 import scrapy
-from scrapy import FormRequest
+from scrapy import FormRequest, Request
 from ..items import PropertyItem
 
 
@@ -45,6 +45,7 @@ class PropertySpider(scrapy.Spider):
 
         listings = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' listing ')]")
         for listing in listings:
+
             prop = PropertyItem()
             prop['id'] = listing.xpath('@id').extract_first()
             prop['location'] = listing.xpath('@data-locationid').extract_first()
@@ -52,4 +53,16 @@ class PropertySpider(scrapy.Spider):
             _name = listing.xpath('//*[@id="property_{}"]'.format(prop['location']))
             prop['name'] = _name.xpath('text()').extract_first()
             prop['url'] = _name.xpath('@href').extract_first()
+
+            request = Request(
+                url=response.urljoin(prop['url']),
+                method='GET',
+                callback=self.parse_reviews
+            )
+            request.meta['prop'] = prop
+
+            yield request
             yield prop
+
+    def parse_reviews(self, response):
+        pass

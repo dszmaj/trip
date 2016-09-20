@@ -2,7 +2,9 @@ from scrapy import Item, Field
 
 
 class ReviewItem(Item):
-    pass
+    id = Field()
+    rating = Field()
+    entry = Field()
 
 
 class PropertyItem(Item):

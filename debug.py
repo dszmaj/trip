@@ -1,6 +1,6 @@
 from scrapy.crawler import CrawlerProcess
 
-from trip.spiders.tripadvisor import PropertySpider
+from trip.spiders.property_spider import PropertySpider
 
 
 if __name__ == '__main__':
@@ -21,7 +21,8 @@ if __name__ == '__main__':
             'Host': 'pl.tripadvisor.com'
         },
         'ITEM_PIPELINES': {
-            #'trip.pipelines.SomePipeline': 300,
+            'trip.pipelines.PropertyPipe': 200,
+            'trip.pipelines.ReviewPipe': 300,
         }
     })
 

@@ -2,7 +2,7 @@ from peewee import (
     SqliteDatabase, Model, CharField, IntegerField, ForeignKeyField
 )
 
-db = SqliteDatabase('../scrapy.db')
+db = SqliteDatabase('./scrapy.db')
 
 
 class BaseModel(Model):
@@ -11,7 +11,18 @@ class BaseModel(Model):
 
 
 class Review(BaseModel):
-    pass
+    id = CharField(primary_key=True)
+    rating = CharField()
+    entry = CharField()
+    # 'prop' related name from Property
+
+    @classmethod
+    def from_item(cls, item):
+        return cls.create(
+            id=item['id'],
+            rating=item['rating'],
+            entry=item['entry']
+        )
 
 
 class Property(BaseModel):
@@ -23,5 +34,16 @@ class Property(BaseModel):
     reviews = ForeignKeyField(
         Review,
         related_name='prop',
-        on_delete='CASCADE'
+        on_delete='CASCADE',
+        null=True
     )
+
+    @classmethod
+    def from_item(cls, item):
+        return cls.create(
+            id=item['id'],
+            location=item['location'],
+            ranking=item['ranking'],
+            name=item['name'],
+            url=item['url']
+        )
