@@ -5,6 +5,7 @@ class ReviewItem(Item):
     id = Field()
     rating = Field()
     entry = Field()
+    prop = Field()
 
 
 class PropertyItem(Item):

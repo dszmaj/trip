@@ -1,6 +1,6 @@
 import scrapy
 from scrapy import FormRequest, Request
-from ..items import PropertyItem
+from ..items import PropertyItem, ReviewItem
 
 
 class PropertySpider(scrapy.Spider):
@@ -64,5 +64,15 @@ class PropertySpider(scrapy.Spider):
             yield request
             yield prop
 
-    def parse_reviews(self, response):
-        pass
+    @staticmethod
+    def parse_reviews(response):
+        reviews = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' reviewSelector ')]")
+        for review in reviews:
+            rev = ReviewItem()
+            rev['id'] = review.xpath('@id').extract_first()
+            _sel = review.xpath('//*[@id="{}"]'.format(rev['id']))
+            rev['rating'] = _sel.xpath('//img[contains(concat(" ", normalize-space(@class), " "), " rating_s_fill ")]/@alt').extract_first()[:3]
+            rev['entry'] = _sel.xpath('//p[@class="partial_entry"]/text()').extract_first()
+            rev['prop'] = response.meta['prop']['id']
+            yield rev
+
