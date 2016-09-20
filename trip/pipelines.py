@@ -1,4 +1,5 @@
 from .database import Property, Review, db
+from .items import PropertyItem, ReviewItem
 
 
 db.connect()
@@ -12,12 +13,18 @@ except:
 class ReviewPipe:
     @staticmethod
     def process_item(item, spider):
-        review = Review.from_item(item)
-        review.save()
+        if isinstance(item, ReviewItem):
+            review = Review.from_item(item)
+            review.save()
+        else:
+            return item
 
 
 class PropertyPipe:
     @staticmethod
     def process_item(item, spider):
-        prop = Property.from_item(item)
-        prop.save()
+        if isinstance(item, PropertyItem):
+            prop = Property.from_item(item)
+            prop.save()
+        else:
+            return item
