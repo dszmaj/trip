@@ -64,15 +64,22 @@ class PropertySpider(scrapy.Spider):
             yield request
             yield prop
 
-    @staticmethod
-    def parse_reviews(response):
+    def parse_reviews(self, response):
         reviews = response.xpath("//div[contains(concat(' ', normalize-space(@class), ' '), ' reviewSelector ')]")
         for review in reviews:
             rev = ReviewItem()
             rev['id'] = review.xpath('@id').extract_first()
-            _sel = review.xpath('//*[@id="{}"]'.format(rev['id']))
-            rev['rating'] = _sel.xpath('//img[contains(concat(" ", normalize-space(@class), " "), " rating_s_fill ")]/@alt').extract_first()[:3]
-            rev['entry'] = _sel.xpath('//p[@class="partial_entry"]/text()').extract_first()
+            rev['rating'] = review.xpath('//*[@id="{}"]'.format(rev['id']) + '//img[contains(concat(" ", normalize-space(@class), " "), " rating_s_fill ")]/@alt').extract_first()[:3]
+            rev['entry'] = review.xpath('//*[@id="{}"]'.format(rev['id']) + '//p[@class="partial_entry"]/text()').extract_first()
             rev['prop'] = response.meta['prop']['id']
             yield rev
 
+        next = response.xpath('//*[@id="REVIEWS"]/div[16]/div/a[position()=1]')
+        href = next.xpath('@href').extract_first()
+        request = Request(
+            url=response.urljoin(href),
+            method='GET',
+            callback=self.parse_reviews
+        )
+        request.meta['prop'] = response.meta['prop']
+        yield request
